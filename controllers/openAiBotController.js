@@ -1,10 +1,8 @@
-const { Telegraf } = require("telegraf");
 const { Configuration, OpenAIApi } = require("openai");
 const helper = require("../util/helper");
+const TGBot = require("./../util/telegramBot");
 
 require("dotenv").config();
-
-const telegramBot = new Telegraf(process.env.TG_BOT_TOKEN);
 
 const configuration = new Configuration({
   organization: "org-YR95NBCzvv0QcfylPqbWHVs2",
@@ -14,12 +12,9 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 //Make a question to bot
-exports.makeQuestionToBot = async (req, res) => {
+const makeQuestionToBot = async (req, res) => {
   if (!req.body.question) {
-    req.json({
-      err_code: 412,
-      err_msg: "question parameter required!",
-    });
+    res.json(helper.ResponseData(412, "question parameter required!", null));
   }
 
   try {
@@ -29,7 +24,7 @@ exports.makeQuestionToBot = async (req, res) => {
       temperature: 0,
       max_tokens: 200,
     });
-    telegramBot.telegram.sendMessage(
+    TGBot.telegramBot.telegram.sendMessage(
       process.env.TG_CHANNEL_ID,
       `Someone search with : "${req.body.question}"`
     );
@@ -43,4 +38,8 @@ exports.makeQuestionToBot = async (req, res) => {
     console.log("Here have some error", error);
     res.json(helper.ResponseData(500, "Internal server error!", error));
   }
+};
+
+module.exports = {
+  makeQuestionToBot,
 };
