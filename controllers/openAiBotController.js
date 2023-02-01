@@ -1,7 +1,10 @@
 const { Telegraf } = require("telegraf");
 const { Configuration, OpenAIApi } = require("openai");
 const helper = require("../util/helper");
+
 require("dotenv").config();
+
+const telegramBot = new Telegraf(process.env.TG_BOT_TOKEN);
 
 const configuration = new Configuration({
   organization: "org-YR95NBCzvv0QcfylPqbWHVs2",
@@ -10,6 +13,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
+//Make a question to bot
 exports.makeQuestionToBot = async (req, res) => {
   if (!req.body.question) {
     req.json({
@@ -17,17 +21,21 @@ exports.makeQuestionToBot = async (req, res) => {
       err_msg: "question parameter required!",
     });
   }
+
   try {
     const completion = await openai.createCompletion({
-      model: "text-davinci-002",
+      model: process.env.OPENAI_BOT_MODEL,
       prompt: req.body.question,
       temperature: 0,
       max_tokens: 200,
     });
+    telegramBot.telegram.sendMessage(
+      "@bee2openaitesting",
+      `Someone search with : "${req.body.question}"`
+    );
     res.json(
       helper.ResponseData(0, "success", completion.data.choices[0].text)
     );
-    // res.json(helper.ResponseData(0, "success", "Leee"));
   } catch (error) {
     console.log("Here have some error", error);
     res.json(helper.ResponseData(500, "Internal server error!", error));
