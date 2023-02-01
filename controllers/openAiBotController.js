@@ -30,12 +30,15 @@ exports.makeQuestionToBot = async (req, res) => {
       max_tokens: 200,
     });
     telegramBot.telegram.sendMessage(
-      "@bee2openaitesting",
+      process.env.TG_CHANNEL_ID,
       `Someone search with : "${req.body.question}"`
     );
-    res.json(
-      helper.ResponseData(0, "success", completion.data.choices[0].text)
-    );
+
+    console.log("Response text : ", completion.data.choices[0].text);
+    let data = {
+      answer: completion.data.choices[0].text,
+    };
+    res.json(helper.ResponseData(0, "success", data));
   } catch (error) {
     console.log("Here have some error", error);
     res.json(helper.ResponseData(500, "Internal server error!", error));
